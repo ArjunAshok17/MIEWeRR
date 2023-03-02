@@ -11,3 +11,5 @@ from visualize import *             # plotting regressive looks
 # conduct algorithm #
 def main(void):
     # user input #
+    dir = input("Enter dataset directory: ")
+    
