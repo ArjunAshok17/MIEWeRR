@@ -1,25 +1,23 @@
 # Program Description #
 # Defines the functions necessary to visualize all the regressive looks #
 
-import numpy as np                  # working with data
-import matplotlib.pyplot as plt     # graphing
-from sklearn import linear_model    # graph regressive looks
+import numpy as np                      # working with data
+import matplotlib.pyplot as plt         # graphing
+from sklearn import linear_model        # graph regressive looks
 from data_management import format_data # format data
 
-# garbage to test the program #
-def test_program():
-    # X = np.atleast_2d(np.arange(0, 3.14*2, 0.05)).T
-    X = format_data(np.arange(0, 3.14*2, .05))
-    print(X)
-    print(f"{X.shape}")
+# # garbage to test the program #
+# def test_program():
+#     # X = np.atleast_2d(np.arange(0, 3.14*2, 0.05)).T
+#     X = format_data(np.arange(0, 3.14 * 2, .05))
   
-    # Assign variables to the y axis part of the curve
-    y = np.sin(X)
-    z = np.cos(X)
+#     # Assign variables to the y axis part of the curve
+#     y = np.sin(X)
+#     z = np.cos(X)
 
-    fig, axs = plot_whole(regr_predictions=[y], input=X, output=z, cols=["test1", "test2"])
+#     fig, axs = plot_whole(regr_predictions=[y], input=X, output=z, cols=["test1", "test2"])
 
-    plt.show()
+#     plt.show()
 
 
 # plot dataset & model #
@@ -70,9 +68,11 @@ def plot_regressive_looks(ax, regr_preds, input):
     # draw each prediction #
     for regr_pred in regr_preds:
         for feature in range(num_features):
+            # print(input)
+            # print(regr_pred)
             ax.plot(np.atleast_2d(input)[ : , feature], regr_pred, color='blue', linewidth=2, label='Linear')
         
 
-# call main #
-if __name__ == "__main__":
-    test_program()
+# # call main #
+# if __name__ == "__main__":
+#     test_program()

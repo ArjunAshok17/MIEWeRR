@@ -6,12 +6,16 @@ import pandas as pd     # load dataframe
 
 
 # full data process #
-def data_import(dir, cols):
+def data_import(dir):
     # load datasets #
-    data = read_data(dir, cols)
-    train_data, test_data, cv_data = split_data(data)
+    data, cols = read_data(dir)
+
+    # find current price #
+    indx = cols.index("price")
+    current_price = np.max( np.atleast_2d(data)[ : , indx ] , axis=0)
 
     # split data #
+    train_data, test_data, cv_data = split_data(data)
     train_input, train_exp_output = split_io(train_data)
     test_input, test_exp_output = split_io(test_data)
     cv_input, cv_exp_output = split_io(cv_data)
@@ -22,19 +26,20 @@ def data_import(dir, cols):
     cv_input = normalize(cv_input)
 
     # return datasets #
-    return [train_input, train_exp_output, test_input, test_exp_output, cv_input, cv_exp_output]
+    return [cols, train_input, train_exp_output, test_input, test_exp_output, cv_input, cv_exp_output, current_price]
 
 
 # reads dataset #
-def read_data(dir, cols):
+def read_data(dir):
     # read into panda dataframe #
-    data = pd.read_csv(dir, ',', usecols=cols)
+    data = pd.read_csv(dir, delimiter=',')
 
     # convert to numpy array #
-    data_arr = np.array(data.values, 'float')
+    data_arr = np.array(data.values, "float")
+    data_cols = data.columns.to_list()
 
     # give back info #
-    return data_arr
+    return data_arr, data_cols
 
 
 # ensure data format #
@@ -52,9 +57,10 @@ def format_data(data):
 
 
 # normalize data #
-def normalize(data):
+def normalize(input):
     # normalize inputs #
-    input = input / input.max(axis=0)
+    # input = (input - input.min(axis=0)) * 100 / (input.max(axis=0) - input.min(axis=0))
+    input = (input - input.min(axis=0))
 
     # return split data #
     return input
@@ -63,12 +69,12 @@ def normalize(data):
 # split data into input & output #
 def split_io(data):
     # dimensions #
-    num_entries, num_cols = data.shape
-    num_cols -= 1
+    num_elements, num_features = data.shape
+    num_features -= 1
 
     # split data #
-    input = np.atleast_2d(data)[ : , : num_cols]
-    expected_output = np.atleast_2d(data)[ :, num_cols]
+    input = np.atleast_2d(data)[ : , : num_features]
+    expected_output = np.atleast_2d(data)[ :, num_features]
 
     # return split #
     return input, expected_output
@@ -77,12 +83,12 @@ def split_io(data):
 # splits into training, test, and cross-validation sets #
 def split_data(data):
     # dimensions #
-    num_cols, num_entries = np.atleast_2d(data).shape
+    num_elements, num_features = np.atleast_2d(data).shape
 
     # percent split #
-    train_entries = int(num_entries * .7)
-    test_entries = int(num_entries * .15)
-    cv_entries = num_entries - (train_entries + test_entries)
+    train_entries = int(num_elements * .7)
+    test_entries = int(num_elements * .15)
+    cv_entries = num_elements - (train_entries + test_entries)
 
     test_start = train_entries + 1
     cv_start = train_entries + test_entries + 1
