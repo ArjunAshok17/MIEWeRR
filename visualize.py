@@ -68,8 +68,6 @@ def plot_regressive_looks(ax, regr_preds, input):
     # draw each prediction #
     for regr_pred in regr_preds:
         for feature in range(num_features):
-            # print(input)
-            # print(regr_pred)
             ax.plot(np.atleast_2d(input)[ : , feature], regr_pred, color='blue', linewidth=2, label='Linear')
         
 

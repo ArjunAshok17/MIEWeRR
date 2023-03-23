@@ -33,13 +33,13 @@ def main():
     col_labels = dataset[0]
 
     data = dataset[1]
-    exp_output = dataset[2]
+    exp_output = format_data(dataset[2])
 
     test_data = dataset[3]
-    test_exp_output = dataset[4]
+    test_exp_output = format_data(dataset[4])
     
     cv_data = dataset[5]
-    cv_exp_output = dataset[6]
+    cv_exp_output = format_data(dataset[6])
     
     global current_price
     current_price = dataset[7]
@@ -51,6 +51,10 @@ def main():
     # train models #
     for frame in time_frames:
         # add trained model #
+        #       regr_look[i] = ith regressive output
+        #       regr_look[i][0] = ith regressive output's coefficient list
+        #       regr_look[i][1] = ith regressive output's intercept list
+        #       regr_look[i][j][k] = kth coefficient
         regr_looks += [ optimize(np.atleast_2d(data)[ : frame, : ], exp_output[ : frame])[1 : ] ]
 
     # multi-regressive model #
@@ -58,26 +62,27 @@ def main():
     
     # predictions #
         # regr_preds = regr_prediction(regr_looks, test_data)
-    print(multi_regr.coef_)
-    print(multi_regr.intercept_)
-    regr_preds = multi_regr.predict(test_data)
+        # regr_preds = format_data(regr_preds)
+    regr_preds = [ multi_regr.predict(test_data) ]
 
     # visualize #
-    # print("VISUALIZING")
-    # fig, axs = plot_whole(regr_preds, test_data, test_exp_output, col_labels)
-    # plt.show()
+    print("VISUALIZING")
+    fig, axs = plot_whole(regr_predictions=regr_preds, input=test_data, output=test_exp_output, cols=col_labels)
+    plt.show()
 
 
 # weighted distribution of regressive looks #
 def regr_weighted(regr_looks, weight_distribution):
     # apply weighting #
     multi_coef = []
+    num_features = len(regr_looks[0][0])
+
     for look_num in range(len(regr_looks)):
-        multi_coef += [ weight_distribution[look_num] * coef for coef in regr_looks[look_num][0] ]
+        multi_coef += [ weight_distribution[look_num] * regr_looks[look_num][0][coef][0] for coef in range(num_features) ]
     
     # averaging #
         # multi_coef = np.average(regr_looks[ : , 0], weight_distribution)
-    multi_coef = np.asarray(multi_coef).mean(axis=0)
+    multi_coef = np.array( [np.asarray(multi_coef).mean(axis=0) ] )
 
     # return model #
     multi_regr = linear_model.LinearRegression()

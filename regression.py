@@ -14,7 +14,7 @@ def optimize(input, exp_out):
     regr_look.fit(input, exp_out)
 
     # return model & parameters #
-    return [ regr_look, regr_look.coef_.tolist(), regr_look.intercept_ ]
+    return [ regr_look, regr_look.coef_.tolist(), regr_look.intercept_.tolist() ]
 
 
 # conducts predictions for all models #
