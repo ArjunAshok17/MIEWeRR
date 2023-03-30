@@ -26,7 +26,6 @@ current_price = -1.0
 def main():
     # declare vars #
     regr_looks = []
-    regr_preds = []
 
     # import #
     dataset = data_import(dir)
@@ -61,13 +60,16 @@ def main():
     multi_regr = regr_weighted(regr_looks, weight_distribution)
     
     # predictions #
-        # regr_preds = regr_prediction(regr_looks, test_data)
-        # regr_preds = format_data(regr_preds)
-    regr_preds = [ multi_regr.predict(test_data) ]
+    regr_preds = regr_prediction(regr_looks, test_data)
+    # print(regr_preds)
+    multi_pred = multi_regr.predict(test_data)
+    multi_pred = np.atleast_2d(multi_pred).T
+
+    # print(regr_preds)
+    np.append(regr_preds, multi_pred)
 
     # visualize #
-    print("VISUALIZING")
-    fig, axs = plot_whole(regr_predictions=regr_preds, input=test_data, output=test_exp_output, cols=col_labels)
+    fig, axs = plot_whole(regr_predictions=multi_pred, input=test_data, output=test_exp_output, cols=col_labels)
     plt.show()
 
 

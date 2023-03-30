@@ -29,6 +29,33 @@ def data_import(dir):
     return [cols, train_input, train_exp_output, test_input, test_exp_output, cv_input, cv_exp_output, current_price]
 
 
+# full data process #
+def feature_import(dir, feature_name):
+    # load datasets #
+    data, cols = read_data(dir)
+
+    # focus data #
+    time_indx = cols.index("time")
+    feature_indx = cols.index(feature_name)
+    data = data[ : , [time_indx, feature_indx] ]
+
+    # sort data #
+    data = np.flip( data[ data[:, 0].argsort() ], axis=0)
+
+    # split data #
+    time_data, feature_data = split_io(data)
+
+    # normalize input #
+    time_data = normalize(time_data)
+
+    # find current info #
+    cur_date = time_data[0][0]
+    cur_val = feature_data[0]
+
+    # return datasets #
+    return [ ["date", feature_name], time_data, feature_data, (cur_date, cur_val) ]
+
+
 # reads dataset #
 def read_data(dir):
     # read into panda dataframe #

@@ -26,7 +26,7 @@ The equation of a line is $y = mx + b$. Of course with more features, this equat
 
 Once these weights are calculated for all the timeframes being considered, we can start the unique weighting process. Given the timeframe consideration, we lack data to do this weighting regressively. Instead, the algorithms opts for a more statistical approach that relies on the timeframe that needs to be predicted.
 
-What we can assume is that behavior in the hyper-short-term is a lot less useful that data in the hyper-long-term. This means we can start distributing the weight with a left skew towards longer timeframes. But where to center the distribution? In this regard, the algorithm is not entirely based in mathematical truths. For the center, we (somewhat arbitrarily, but with reasonable assumption) pick the timeframe that most closely resembles the timeframe we try to predict.
+What we can assume is that behavior in the hyper-short-term is a lot less useful that data in the hyper-long-term. This means we can start distributing the weight with a right skew towards longer timeframes. But where to center the distribution? In this regard, the algorithm is not entirely based in mathematical truths. For the center, we (somewhat arbitrarily, but with reasonable assumption) pick the timeframe that most closely resembles the timeframe we try to predict.
 
 For example, if a price at the end of 3-months wants to be predicted, the algorithm would weigh the performance calculated by the regressive look at the *past* 3 months the highest. The second highest would be the past 6 months. Then past month, past year, and so on.
 

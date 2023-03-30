@@ -6,29 +6,17 @@ from data_management import *       # data management
 
 
 # returns optimized linear model #
-def optimize(input, exp_out):
+def optimize(input, exp_out, cur_val):
     # model creation #
-    regr_look = linear_model.LinearRegression()
+    regr_look = linear_model.LinearRegression(fit_intercept=False)
+    exp_out = exp_out - cur_val
     
     # train #
     regr_look.fit(input, exp_out)
+    # regr_look.intercept_ = cur_val  # warning, does not change intercept val
 
     # return model & parameters #
-    return [ regr_look, regr_look.coef_.tolist(), regr_look.intercept_.tolist() ]
-
-
-# conducts predictions for all models #
-def regr_prediction(regr_looks, input):
-    # make prediction #
-    for regr_look_info in regr_looks:
-        regr_look = linear_model.LinearRegression()
-        regr_look.coef_ = regr_look_info[0]
-        regr_look.intercept_ = regr_look_info[1]
-
-        regr_preds += [regr_look.predict(input)]
-
-    # return regressive predictions #
-    return regr_preds
+    return [ regr_look, regr_look.coef_[0], cur_val ]
 
 
 """
