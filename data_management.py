@@ -1,5 +1,9 @@
-# Program Description #
-# Defines the functions necesary to load, modify, convert, and otherwise manage datasets #
+"""
+    This file defines the functions necessary to load, modify, convert, and otherwise manage the data 
+    used in the algorithm.
+
+    Additional functionality will be implemented in future iterations.
+"""
 
 import numpy as np      # cleanse data
 import pandas as pd     # load dataframe
@@ -10,23 +14,14 @@ def data_import(dir):
     # load datasets #
     data, cols = read_data(dir)
 
-    # find current price #
-    indx = cols.index("price")
-    current_price = np.max( np.atleast_2d(data)[ : , indx ] , axis=0)
-
     # split data #
-    train_data, test_data, cv_data = split_data(data)
-    train_input, train_exp_output = split_io(train_data)
-    test_input, test_exp_output = split_io(test_data)
-    cv_input, cv_exp_output = split_io(cv_data)
+    train_data, train_output = split_io(data)
 
     # normalize input #
-    train_input = normalize(train_input)
-    test_input = normalize(test_input)
-    cv_input = normalize(cv_input)
+    train_data = normalize(train_data)
 
     # return datasets #
-    return [cols, train_input, train_exp_output, test_input, test_exp_output, cv_input, cv_exp_output, current_price]
+    return [cols, train_data, train_output]
 
 
 # full data process #

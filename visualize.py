@@ -1,23 +1,15 @@
-# Program Description #
+"""
+    This file defines the functions necessary to easily visualize multiply (self-referential) regressive 
+    looks at the same dataset (for individual features), and plotting a predictive line for forecasting 
+    all features in the future combined with their associative power (with respect to the final predictive 
+    quantity).
+"""
 # Defines the functions necessary to visualize all the regressive looks #
 
 import numpy as np                      # working with data
 import matplotlib.pyplot as plt         # graphing
 from sklearn import linear_model        # graph regressive looks
 from data_management import format_data # format data
-
-# # garbage to test the program #
-# def test_program():
-#     # X = np.atleast_2d(np.arange(0, 3.14*2, 0.05)).T
-#     X = format_data(np.arange(0, 3.14 * 2, .05))
-  
-#     # Assign variables to the y axis part of the curve
-#     y = np.sin(X)
-#     z = np.cos(X)
-
-#     fig, axs = plot_whole(regr_predictions=[y], input=X, output=z, cols=["test1", "test2"])
-
-#     plt.show()
 
 
 # plot dataset & model #
@@ -46,7 +38,7 @@ def plot_whole(regr_predictions, input, output, cols):
         ax.scatter(np.atleast_2d(input)[ : , plt_num], np.atleast_2d(output)[ : , : ], color='black')
         
         # plot regressive looks #
-        plot_regressive_looks(ax, regr_preds=regr_predictions, input=input)
+        # plot_regressive_looks(ax, regr_preds=regr_predictions, input=input)
 
         # labeling #
         ax.set_title(f"{pred_type} correlation w/ {cols[plt_num]}")
@@ -61,17 +53,23 @@ def plot_whole(regr_predictions, input, output, cols):
 
 
 # plots all regressive looks #
-def plot_regressive_looks(ax, regr_preds, input):
-    # variable handling #
-    num_elements, num_features = np.atleast_2d(input).shape
+def plot_forecasts(data, exp_out, future_data, pred_data):
+    # plot data #
+    plt.scatter(data, exp_out, color="black")
 
-    # draw each prediction #
-    for regr_pred in regr_preds:
-        for feature in range(num_features):
-            ax.plot(np.atleast_2d(input)[ : , feature], regr_pred, color='blue', linewidth=2, label='Linear')
+    # plot forecasts #
+    plt.plot(future_data, pred_data, color="forestgreen", label="Multi-Regressive Forecast")
+
+    # labels #
+    plt.legend()
+    plt.xlabel("features")
+    plt.ylabel("model output")
+
+    # show plot #
+    plt.show()
 
 
-# plots regressiv elooks for one feature #
+# plots regressive looks for one feature #
 def plot_feature_looks(regr_preds, self_pred, input, output, pred_data, time_frames, col_labels):
     # plot data #
     plt.plot(input, output, color="black")
@@ -92,10 +90,24 @@ def plot_feature_looks(regr_preds, self_pred, input, output, pred_data, time_fra
     plt.xlabel(col_labels[0])
     plt.ylabel(col_labels[1])
 
-    # Show the plot
+    # show plot #
     plt.show()
-        
 
-# # call main #
+
+# # garbage to test the program #
+# def test_program():
+#     # X = np.atleast_2d(np.arange(0, 3.14*2, 0.05)).T
+#     X = format_data(np.arange(0, 3.14 * 2, .05))
+  
+#     # Assign variables to the y axis part of the curve
+#     y = np.sin(X)
+#     z = np.cos(X)
+
+#     fig, axs = plot_whole(regr_predictions=[y], input=X, output=z, cols=["test1", "test2"])
+
+#     plt.show()
+
+
+# run as script #
 # if __name__ == "__main__":
 #     test_program()

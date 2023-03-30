@@ -1,119 +1,114 @@
 """
-    Main program from which sub-functions are called to run the final algorithm
+    This algorithm combines all the sub-functions defined elsewhere, allowing us to generate a self-
+    sufficient predictive model that predicts how each of the features considered trend in the future, 
+    and then uses that to predict how the final output evolves in the future.
+
+    Note: the final model doesn't rely on time at all, opting to defer any forecasting to the feature 
+          models and only taking responsibility for the final associations with the data. This allows 
+          us to produce an optimal relationship between all the features while maintaing a predictive 
+          ability with respect to time.
 """
 
 # import files #
+        # from data_scrape import *           # real-time stock data
+        # from performance_sim import *       # simulate the performance of the final model
 from data_management import *       # import, track, and clean data
-# from data_scrape import *           # real-time stock data
 from regression import *            # run regression w/ gradient descent
-# from performance_sim import *       # simulate the performance of the final model
 from visualize import *             # plotting regressive looks
-from math import floor              # time split
+from self_contained_regr import *   # for each feature's self-referential regressive model
 
 
-# set params #
+"""
+    ======= Set Params for Testing ========
+    dir             = ""        | string for the directory to source data from
+    feature_set     = [""]      | features to predict and consider; num_features inferred from here; time assumed always a feature
+    weight_dists    = [[#.#]]   | weight distributions for each feature in feature_set
+    time_ratios     = [[#.#]]   | time frame ratios for each weight distribution in weight_dists    
+    pred_yrs        = #.#       | number of years to predict to (will output predictions for every day till then)
+"""
 global dir
 dir = "./NYSE_sample_data/prices_adjusted.csv"
-global weight_distribution
-weight_distribution = [10, 10, 15, 25, 15, 10, 5]
-global time_frame_ratio
-time_frame_ratio = [1, .75, .5, .25, .1, .05, .01]
-global current_price
-current_price = -1.0
+
+global feature_set
+feature_set = ["price"]
+global final_feature
+final_feature = "price"
+
+global weight_dists
+weight_dists = [[25, 30, 25, 20, 15, 5, 1]]
+global time_ratios
+time_ratios = [[1, .75, .5, .25, .1, .05, .01]]
+
+global pred_yrs
+pred_yrs = 3
 
 
 # conduct algorithm #
-def main():
+def multi_regression():
+    # check params #
+    check_params()
+
     # declare vars #
-    regr_looks = []
+    self_contained_models = []      # stores final models for each feature
+    self_contained_forecasts = []   # stored final forecasts (for the given predictive range) for each feature
 
     # import #
     dataset = data_import(dir)
     col_labels = dataset[0]
 
     data = dataset[1]
-    exp_output = format_data(dataset[2])
-
-    test_data = dataset[3]
-    test_exp_output = format_data(dataset[4])
+    output = format_data(dataset[2])
     
-    cv_data = dataset[5]
-    cv_exp_output = format_data(dataset[6])
-    
-    global current_price
-    current_price = dataset[7]
+    # build associations for each feature #
+    multi_regr_model = optimize(input=data, exp_out=output, cur_val=-1, fix_intercept=False)
+    multi_regr = multi_regr_model[0]
 
-    # time frames #
-    data[np.atleast_2d(data)[:, 0].argsort()]
-    time_frames = split_time_frame(data, time_frame_ratio)
-    
-    # train models #
-    for frame in time_frames:
-        # add trained model #
-        #       regr_look[i] = ith regressive output
-        #       regr_look[i][0] = ith regressive output's coefficient list
-        #       regr_look[i][1] = ith regressive output's intercept list
-        #       regr_look[i][j][k] = kth coefficient
-        regr_looks += [ optimize(np.atleast_2d(data)[ : frame, : ], exp_output[ : frame])[1 : ] ]
-
-    # multi-regressive model #
-    multi_regr = regr_weighted(regr_looks, weight_distribution)
+    # train self-referencing feature predictions #
+    for feat_num in range(len(feature_set)):
+        self_contained_out = self_contained_regression(dir,
+                                                       feature_name=feature_set[feat_num],
+                                                       weights=weight_dists[feat_num],
+                                                       time_ratio=time_ratios[feat_num],
+                                                       pred_yrs=pred_yrs
+                                                      )
+        self_contained_models.append(self_contained_out[0])
+        self_contained_forecasts.append(self_contained_out[1])
     
     # predictions #
-    regr_preds = regr_prediction(regr_looks, test_data)
-    # print(regr_preds)
-    multi_pred = multi_regr.predict(test_data)
-    multi_pred = np.atleast_2d(multi_pred).T
-
-    # print(regr_preds)
-    np.append(regr_preds, multi_pred)
+    forecasted_feature_data = produce_forecasted_data(forecasts=self_contained_forecasts)
+    forecast_predictions = multi_regr.predict(forecasted_feature_data)
 
     # visualize #
-    fig, axs = plot_whole(regr_predictions=multi_pred, input=test_data, output=test_exp_output, cols=col_labels)
-    plt.show()
+    plot_forecasts(data=data, exp_out=output, future_data=forecasted_feature_data, pred_data=forecast_predictions)
 
 
-# weighted distribution of regressive looks #
-def regr_weighted(regr_looks, weight_distribution):
-    # apply weighting #
-    multi_coef = []
-    num_features = len(regr_looks[0][0])
+# produces the final predictive dataset for all features #
+def produce_forecasted_data(forecasts):
+    # combine all forecasts #
+    forecasted_data = np.stack(forecasts, axis=1)
+    return forecasted_data
 
-    for look_num in range(len(regr_looks)):
-        multi_coef += [ weight_distribution[look_num] * regr_looks[look_num][0][coef][0] for coef in range(num_features) ]
+# checks params are correctly inputted #
+def check_params():
+    num_features = len(feature_set)
+
+    if num_features <= 0:
+        print("ERROR: positive integer number of features required")
+        quit()
     
-    # averaging #
-        # multi_coef = np.average(regr_looks[ : , 0], weight_distribution)
-    multi_coef = np.array( [np.asarray(multi_coef).mean(axis=0) ] )
+    if len(weight_dists) != num_features:
+        print("ERROR: check matching length for weight_dists and feature_set")
+        quit()
 
-    # return model #
-    multi_regr = linear_model.LinearRegression()
-    multi_regr.coef_ = multi_coef
-    multi_regr.intercept_ = current_price
-    return multi_regr
+    if len(time_ratios) != num_features:
+        print("ERROR: check matching length for time_ratios and feature_set")
+        quit()
 
-
-# create custom weighting based on predictive range #
-def distribute_weights(pred_range, skew, num_timeframes):
-    """
-        pred_range: number of time units to predict to
-        skew:       -1 is left (longer term) skew,
-                    0 is normal curve,
-                    1 is right (shorter term skew)
-    """
-    # to be implemented #
-    return weight_distribution
+    if len(time_ratios[0]) != len(weight_dists[0]):
+        print("ERROR: check matching length for weight_dists[0] and time_ratios[0]")
+        quit()
 
 
-# divide data into time frames #
-def split_time_frame(time_data, frame_ratio):
-    # range #
-    begin = np.min(time_data)
-    end = np.max(time_data)
-    range = end - begin
-
-    # divide #
-    return [floor(ratio * range) for ratio in frame_ratio]
-
+# run as script #
 if __name__ == "__main__":
-    main()
+    multi_regression()

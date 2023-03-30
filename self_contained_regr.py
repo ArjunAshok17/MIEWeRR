@@ -6,34 +6,27 @@
 
 # import files #
 from data_management import *       # import, track, and clean data
-# from data_scrape import *           # real-time stock data
 from regression import *            # run regression w/ gradient descent
-# from performance_sim import *       # simulate the performance of the final model
 from visualize import *             # plotting regressive looks
 from math import floor              # time split
 
 
 # set params #
 global weight_distribution
-weight_distribution = [15, 25*100000000, 30, 25, 15, 5, 2.5]
 global time_frame_ratio
-time_frame_ratio = [1, .75, .5, .25, .1, .05, .01]
-
 global cur_val
-cur_val = -1.0
 global cur_date
-cur_date = -1
 global pred_range
-pred_range = 3*365      # measured in days, number of days to predict to
 
 
 # conduct algorithm #
-def main():
-    # declare vars #
+def self_contained_regression(dir, feature_name, weights, time_ratio, pred_yrs):
+    # params #
+    set_params(weights, time_ratio, pred_yrs)
     regr_looks = []
 
     # import #
-    feature_data = feature_import("./NYSE_sample_data/prices_adjusted.csv", "price")
+    feature_data = feature_import(dir, feature_name)
 
     col_labels = feature_data[0]
     data = feature_data[1]
@@ -48,21 +41,23 @@ def main():
     time_frames = split_time_frame(time_data=data, frame_ratio=time_frame_ratio)
     
     # train models #
-    regr_looks = train_regr_looks(time_frames=time_frames, input=data, output=feature_output)
+    regr_looks = train_regr_looks(time_frames=time_frames, input=data, output=feature_output, fix=False)
 
     # multi-regressive model #
     self_regr = regr_weighted(regr_looks=regr_looks, weight_distribution=weight_distribution)
     
     # predictions #
     regr_preds = regr_prediction(regr_looks=regr_looks, input=data, time_frames=time_frames)
-    print(cur_date, cur_val)
 
-    self_pred_data = np.arange(cur_date, cur_date + pred_range).reshape(-1, 1)
+    self_pred_data = np.arange(cur_date, int(cur_date + pred_range)).reshape(-1, 1)
     self_pred = self_regr.predict(self_pred_data)
 
     # visualize #
     plot_feature_looks(regr_preds=regr_preds, self_pred=self_pred, input=data, output=feature_output, pred_data=self_pred_data,\
                        time_frames=time_frames, col_labels=col_labels)
+    
+    # return outputs #
+    return [ self_regr, self_pred ]
 
 
 # weighted distribution of regressive looks #
@@ -104,7 +99,7 @@ def regr_prediction(regr_looks, input, time_frames):
 
 
 # train regressive looks #
-def train_regr_looks(time_frames, input, output):
+def train_regr_looks(time_frames, input, output, fix):
     """
         add trained model for each regressive look:
               regr_look[i]      = ith regressive output
@@ -114,8 +109,8 @@ def train_regr_looks(time_frames, input, output):
     regr_looks = []
     
     for frame in time_frames:
-        model_info = optimize( input[ : frame], output[ : frame], cur_val=output[frame - 1] )
-        regr_looks.append([ model_info[1][0], model_info[2][0] ])
+        model_info = optimize( input[ : frame], output[ : frame], cur_val=output[frame - 1][0], fix_intercept=fix )
+        regr_looks.append([ model_info[1][0], model_info[2] ])
     
     return np.array(regr_looks)
 
@@ -123,6 +118,7 @@ def train_regr_looks(time_frames, input, output):
 # create custom weighting based on predictive range #
 def distribute_weights(pred_range, skew, num_timeframes):
     """
+        This will eventually replace the need to pass in weights and timeframe ratios.
         pred_range: number of time units to predict to
         skew:       -1 is left (longer term) skew,
                     0 is normal curve,
@@ -143,5 +139,27 @@ def split_time_frame(time_data, frame_ratio):
     # divide #
     return [ floor(ratio * range) for ratio in frame_ratio ]
 
+
+def set_params(weights, time_ratio, pred_yrs):
+    """
+        weights:    distribution of weights along each time frame
+        time ratio: ratio of time units for each time frame
+        pred_yrs:   number of years to forecast to
+    """
+    global weight_distribution
+    weight_distribution = weights
+
+    global time_frame_ratio
+    time_frame_ratio = time_ratio
+
+    global pred_range
+    pred_range = pred_yrs * 365
+
+
+# run as script #
 if __name__ == "__main__":
-    main()
+    self_contained_regression("./NYSE_sample_data/prices_adjusted.csv",\
+                              "price",\
+                              [25, 30, 25, 20, 15, 5, 1],\
+                              [1, .75, .5, .25, .1, .05, .01],\
+                               3)
