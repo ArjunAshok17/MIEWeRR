@@ -4,7 +4,6 @@
     all features in the future combined with their associative power (with respect to the final predictive 
     quantity).
 """
-# Defines the functions necessary to visualize all the regressive looks #
 
 import numpy as np                      # working with data
 import matplotlib.pyplot as plt         # graphing

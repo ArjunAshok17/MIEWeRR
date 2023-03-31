@@ -14,6 +14,13 @@ def data_import(dir):
     # load datasets #
     data, cols = read_data(dir)
 
+    # disregard time #
+    time_indx = cols.index("time")
+    cols.remove("time")
+    col_indxs = [ cols.index(col) for col in cols ]
+
+    data = data[ : , col_indxs ]
+
     # split data #
     train_data, train_output = split_io(data)
 
@@ -21,7 +28,7 @@ def data_import(dir):
     train_data = normalize(train_data)
 
     # return datasets #
-    return [cols, train_data, train_output]
+    return [ cols, train_data, train_output ]
 
 
 # full data process #
@@ -48,7 +55,7 @@ def feature_import(dir, feature_name):
     cur_val = feature_data[0]
 
     # return datasets #
-    return [ ["date", feature_name], time_data, feature_data, (cur_date, cur_val) ]
+    return [ ["time", feature_name], time_data, feature_data, (cur_date, cur_val) ]
 
 
 # reads dataset #

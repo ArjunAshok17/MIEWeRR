@@ -3,7 +3,6 @@
     are currently implemented using pure statistics (line of best fit using LMSR) in sklearn, but will later be 
     reimplemented using gradient descent.
 """
-# Defines the functions necessary to run linear regression on a dataset #
 
 from sklearn import linear_model    # linear regression
 from data_management import *       # data management
