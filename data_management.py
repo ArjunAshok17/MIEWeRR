@@ -15,7 +15,6 @@ def data_import(dir):
     data, cols = read_data(dir)
 
     # disregard time #
-    time_indx = cols.index("time")
     cols.remove("time")
     col_indxs = [ cols.index(col) for col in cols ]
 
@@ -56,6 +55,15 @@ def feature_import(dir, feature_name):
 
     # return datasets #
     return [ ["time", feature_name], time_data, feature_data, (cur_date, cur_val) ]
+
+
+# exports data #
+def data_export(dataset, col_labels, output_dir):
+    # dataframe creation #
+    df = pd.DataFrame(dataset)
+
+    # deploy data #
+    df.to_csv(output_dir, columns=col_labels)
 
 
 # reads dataset #
