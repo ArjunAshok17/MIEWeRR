@@ -1,7 +1,7 @@
 # Multi-Regression-Analysis #
 
 ### Quick Look ###
-This algorithm takes multiple regressive looks at the same set of data [with respect to different timeframes] to generate the most accurate linear outlook for a given time period.
+This algorithm takes multiple regressive looks at the same set of data [with respect to different timeframes] to generate the most accurate linear outlook for a given time period. In other words, a regressive analog to LSTM (long-short-term-memory) models.
 
 The algorithm will be implemented first in Python and later in C++, though the C++ version may not contain files for data manipulation.
 
