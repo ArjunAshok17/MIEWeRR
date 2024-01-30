@@ -1,5 +1,5 @@
-# MIEWeRR #
-Multiple Inter-Extrapolative Weighted Rolling Regression model for time-series forecasting.
+# SWIRe-Model #
+Sliding Window Inter-extrapolative Regression model for time-series forecasting.
 
 You may ask if that's too long a name, or if it even means much--to that I say "yes and no".
 
