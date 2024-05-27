@@ -1,7 +1,7 @@
 # SWIRe-Model #
 Sliding Window Inter-extrapolative Regression model for time-series forecasting.
 
-You may ask if that's too long a name, or if it even means much--to that I say "yes and no".
+You may ask if that's too long a name, or if it even means much--same.
 
 ### Quick Look ###
 This algorithm takes multiple regressive looks at the same set of data [concerning different timeframes] to generate the most accurate linear outlook for a given period. In other words, a regressive analog to LSTM (long-short-term-memory) models.
