@@ -20,7 +20,8 @@ global pred_range
 
 
 # conduct algorithm #
-def self_contained_regression(dir, feature_name, weights, time_ratio, pred_yrs):
+def self_contained_regression(dir, feature_name, weights, time_ratio, pred_yrs,
+                              fix_intercept=True):
     # params #
     set_params(weights, time_ratio, pred_yrs)
     regr_looks = []
@@ -41,7 +42,7 @@ def self_contained_regression(dir, feature_name, weights, time_ratio, pred_yrs):
     time_frames = split_time_frame(time_data=data, frame_ratio=time_frame_ratio)
     
     # train models #
-    regr_looks = train_regr_looks(time_frames=time_frames, input=data, output=feature_output, fix=False)
+    regr_looks = train_regr_looks(time_frames=time_frames, input=data, output=feature_output, fix=fix_intercept)
 
     # multi-regressive model #
     self_regr = regr_weighted(regr_looks=regr_looks, weight_distribution=weight_distribution)
